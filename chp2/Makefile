@@ -34,10 +34,11 @@ test-grepdir: build
 test-grepdir-error: build
 	./chp2 grepdir "third" non-existent-dir
 
+test-greprec: build
+	./chp2 greprec "first" fixtures
+	./chp2 greprec "second" fixtures
+	./chp2 greprec "first and only" fixtures
+	./chp2 greprec "THIS DNE" fixtures
 
-
-# test-greprec: build
-# 	./chp2 greprec "first" fixtures
-# 	./chp2 greprec "second" fixtures
-# 	./chp2 greprec "first and only" fixtures
-# 	./chp2 greprec "THIS DNE" fixtures
+test-greprec-error: build
+	./chp2 greprec "first" non-existent-dir
