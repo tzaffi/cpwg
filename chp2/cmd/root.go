@@ -10,9 +10,11 @@ import (
 
 	"github.com/tzaffi/cpwg/chp2/pkg/cat"
 	"github.com/tzaffi/cpwg/chp2/pkg/grep"
+	"github.com/tzaffi/cpwg/chp2/pkg/grepdir"
 )
 
 var files []string
+var dir string
 var pattern string
 
 // rootCmd represents the base command when called without any subcommands
@@ -21,14 +23,25 @@ var rootCmd = &cobra.Command{
 	Short: "General purpose text file processing switched via flags or subcommands",
 	// Long:  `...`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(files) == 0 {
+		if len(files) == 0 && len(dir) == 0 {
+			cmd.PrintErr("No files or dir provided\n")
+			cmd.Help()
+			os.Exit(1)
+		}
+		if len(files) > 0 && len(dir) > 0 {
+			cmd.PrintErr("Cannot use both files and dir flags\n")
 			cmd.Help()
 			os.Exit(1)
 		}
 		// if pattern was provided, use it to call grep.Grep
 		// otherwise, call cat.CatRand
 		if pattern != "" {
-			if err := grep.Grep(files, pattern); err != nil {
+			if len(files) > 0 {
+				if err := grep.Grep(files, pattern); err != nil {
+					cmd.PrintErr(err, "\n")
+					os.Exit(1)
+				}
+			} else if err := grepdir.GrepDir(dir, pattern); err != nil {
 				cmd.PrintErr(err, "\n")
 				os.Exit(1)
 			}
@@ -53,5 +66,6 @@ func Execute() {
 
 func init() {
 	rootCmd.PersistentFlags().StringSliceVarP(&files, "files", "f", []string{}, "Files for processing")
+	rootCmd.PersistentFlags().StringVarP(&dir, "dir", "d", "", "Directory for processing")
 	rootCmd.Flags().StringVarP(&pattern, "pattern", "p", "", "Pattern to search for in the files")
 }
